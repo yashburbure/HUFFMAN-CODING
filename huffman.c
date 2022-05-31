@@ -3,7 +3,7 @@
 
 #ifndef HUFFMAN_C
 #define HUFFMAN_C
-Hnode* new_Hnode(char ch,long long freq){
+Hnode* new_Hnode(char ch,int freq){
     Hnode* nn=(Hnode*)malloc(sizeof(Hnode));
     nn->freq=freq;
     nn->symbol=ch;
@@ -11,7 +11,7 @@ Hnode* new_Hnode(char ch,long long freq){
     return nn;
 }
 
-void generate_code(Hnode* root,long long *curr_cw,long long* bit,huffman_encoder* e){
+void generate_code(Hnode* root,int *curr_cw,int* bit,huffman_encoder* e){
     if(!root){
         return;
     }
@@ -28,6 +28,7 @@ void generate_code(Hnode* root,long long *curr_cw,long long* bit,huffman_encoder
     else{
         e->codewords[root->symbol]=*curr_cw;
         e->lengts[root->symbol]=*bit;
+        assert(*bit<=8 && "HUFFMAN code size too large");
     }
 }
 
@@ -36,29 +37,20 @@ void compute_canonical_code(huffman_encoder* e,Hnode* root){
         e->codewords[i]=0;
         e->lengts[i]=0;
     }
-    long long curr_codewords=0;
-    long long bit=0;
+    int curr_codewords=0;
+    int bit=0;
     generate_code(root,&curr_codewords,&bit,e);
 }
+Hnode* destroy_huffman_tree(Hnode* root){
+    if(!root) return NULL;
+    root->left=destroy_huffman_tree(root->left);
+    root->right=destroy_huffman_tree(root->right);
+    Hnode* del=root;
+    free(del);
+    return NULL;
+}
 
-// void preorder(Hnode* root,int *i,char str[]){
-//     if(!root) return;
-//     if(root->left || root->right){
-//         str[*i]='0';
-//         (*i)++;
-//         preorder(root->left,i,str);
-//         (*i)--;
-//         str[*i]='1';
-//         (*i)++;
-//         preorder(root->right,i,str);
-//         (*i)--;
-//         str[*i]='\0';
-//     }
-//     else{
-//         printf("%c-%s-%d\n",root->symbol,str,root->freq);
-//     }
-// }
-void build_huffman_tree(huffman_encoder* e,long long freqs[],long long n){
+void build_huffman_tree(huffman_encoder* e,int freqs[],int n){
     long long freq_sum=0;
     for(int i=0;i<n;i++){
         freq_sum+=freqs[i];
@@ -72,6 +64,12 @@ void build_huffman_tree(huffman_encoder* e,long long freqs[],long long n){
             push_heap(&h,nn);
         }
     }
+    if(size_heap(h)==1){
+        Hnode* front=top_heap(h);
+        e->codewords[front->symbol]=0;
+        e->lengts[front->symbol]=1;
+        return;
+    }
     Hnode* root=NULL;
     while(size_heap(h)>1){
         Hnode* front1=top_heap(h);
@@ -81,18 +79,19 @@ void build_huffman_tree(huffman_encoder* e,long long freqs[],long long n){
         Hnode* nn=new_Hnode('-',front1->freq+front2->freq);
         push_heap(&h,nn);
         nn->left=front1;
-        nn->right=front2;
+        nn->right=front2;   
+        free_heap(&h);
     }
     root=top_heap(h);
     compute_canonical_code(e,root);
-    // char str[100];
-    // str[0]='\0';
-    // int i=0;
-    // preorder(root,&i,str);
+    root=destroy_huffman_tree(root);
+    free_heap(&h);
 }
-
-
-void huffman_encoder_init(huffman_encoder* e,long long freqs[],long long n){
+void huffman_encoder_init(huffman_encoder* e,int freqs[],int n){
+    for(int i=0;i<MAX_HUFFMAN_SYMBOLS;i++){
+        e->codewords[i]=0;
+        e->lengts[i]=0;
+    }
     build_huffman_tree(e,freqs,n);
 }
 
