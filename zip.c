@@ -1,6 +1,6 @@
 #include"huffman.c"
 #include"zip.h"
-#include"LZSS.c"
+// #include"LZSS.c"
 #ifndef ZIP_C
 #define ZIP_C
 
