@@ -68,6 +68,7 @@ void build_huffman_tree(huffman_encoder* e,int freqs[],int n){
         Hnode* front=top_heap(h);
         e->codewords[front->symbol]=0;
         e->lengts[front->symbol]=1;
+        free_heap(&h);
         return;
     }
     Hnode* root=NULL;
@@ -80,7 +81,6 @@ void build_huffman_tree(huffman_encoder* e,int freqs[],int n){
         push_heap(&h,nn);
         nn->left=front1;
         nn->right=front2;   
-        free_heap(&h);
     }
     root=top_heap(h);
     compute_canonical_code(e,root);

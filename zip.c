@@ -1,23 +1,38 @@
 #include"huffman.c"
 #include"zip.h"
-// #include"LZSS.c"
 #ifndef ZIP_C
 #define ZIP_C
 
 FILE* table_writer(FILE* output,huffman_encoder e){
-    int sum=0;
+    unsigned int sum=0;
     for(int i=0;i<FREQ_SIZE;i++){
         if(e.lengts[i]!=0){
             sum++;
         }
     }
-    fprintf(output,"%d",sum);
+    unsigned char ch;
+    int index=31;
+    for(int i=0;i<4;i++){
+        unsigned char ch=0;
+        for(int j=7;j>=0;j--){
+            if(sum&(1<<index)){
+                ch=ch|(1<<j);
+            }
+            index--;
+        }
+        fprintf(output,"%c",(int)ch);
+    }
+    // printf("%d\n",sum);
     for(int i=0;i<FREQ_SIZE;i++){
         if(e.lengts[i]){
             unsigned char ch=i;
+            assert(i!=26 && "EOF can't be inserted"); 
+            assert(e.codewords[i]!=26 && "EOF can't be inserted"); 
+            assert(e.lengts[i]!=26 && "EOF can't be inserted"); 
             fprintf(output,"%c",i);
             fprintf(output,"%c",e.lengts[i]);
             fprintf(output,"%c",e.codewords[i]);
+            // printf("%c %d %d\n",ch,e.lengts[i],e.codewords[i]);
         }
     }
     return output;
@@ -38,23 +53,31 @@ void create_file(char* filename,huffman_encoder e){
     output=table_writer(output,e);
     unsigned char ch;
     unsigned char buffer=0;
-    int current_bit=0;
+    int current_bit=7;
+    // printf("\n");
     while(fscanf(inpt,"%c",&ch)!=EOF){
         int code=e.codewords[(int)ch];
         int sz=e.lengts[(int)ch];
+        //printf("%d ",code);
         for(int i=0;i<sz;i++){
             if(code&(1ll<<i)){
                 buffer|=(1<<current_bit);
             }
-            current_bit++;
-            if(current_bit>7){
+            current_bit--;
+            if(current_bit<0){
+                //printf("%d ",(int)buffer);
+                assert(((int)buffer)!=26 && "EOF can't be inserted");
                 fprintf(output,"%c",buffer);
                 buffer=0;
-                current_bit=0;
+                current_bit=7;
             }
         }
     }
-    if(current_bit!=7) fprintf(output,"%c",buffer);
+    if(current_bit!=7){
+        // printf("%d ",(int)buffer);
+        assert(((int)buffer)!=26 && "EOF can't be inserted");
+        fprintf(output,"%c",buffer);
+    }
     fclose(inpt);
     fclose(output);
 }
