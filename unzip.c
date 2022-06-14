@@ -1,7 +1,8 @@
 #ifndef UNZIP_C
 #define UNZIP_C
 #define FREQ_SIZE 256
-//char ,length,codeword
+
+
 FILE* table_reader(FILE* file,int codewords[],int lengths[]){
     unsigned int no_ele=0;
     int index=31;
@@ -13,7 +14,6 @@ FILE* table_reader(FILE* file,int codewords[],int lengths[]){
             index--;
         }
     }
-    // printf("%d\n",no_ele);
     for(int i=0;i<no_ele;i++){
         char ch;
         fscanf(file,"%c",&ch);
@@ -22,12 +22,11 @@ FILE* table_reader(FILE* file,int codewords[],int lengths[]){
         lengths[index]=(int)ch;
         fscanf(file,"%c",&ch);
         codewords[index]=(int)ch;
-        // printf("%c %d %d \n",index,lengths[index],codewords[index]);
     }
     return file;
 }
 void unzip(char* filename){
-    FILE* file=fopen(filename,"r");
+    FILE* file=fopen(filename,"rb");
     if(!file){
         printf("Can't Open file\n");
         return;
@@ -36,11 +35,15 @@ void unzip(char* filename){
     int codewords[FREQ_SIZE]={0};
     int lengths[FREQ_SIZE]={0};
     file=table_reader(file,codewords,lengths);
+    int bitswritten;
+    fread(&bitswritten,sizeof(bitswritten),1,file);
     unsigned char ch;
     unsigned int buffer=0;
     int buffer_size=0;
-    while(fscanf(file,"%c",&ch)!=EOF){
+    int bitsread=0;
+    while(fread(&ch,sizeof(ch),1,file)){
         for(int i=7;i>=0;i--){
+            bitsread++;
             if(ch&(1<<i)){
                 buffer|=(1<<buffer_size);
             }
@@ -48,11 +51,13 @@ void unzip(char* filename){
             for(int i=0;i<FREQ_SIZE;i++){
                 if(codewords[i]==buffer && lengths[i]==buffer_size){
                     fprintf(out,"%c",i);
-                    // printf("%d ",i);
                     buffer=0;
                     buffer_size=0;
                     break;  
                 }
+            }
+            if(bitsread==bitswritten){
+                return;
             }
         }
     }
