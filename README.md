@@ -8,7 +8,7 @@ The idea of Huffman Coding is to minimize the weighted expected length of the co
 
 ## Implementation Details
 
-The programs can compress and decompress text file consisting of 128 ASCII characters.
+The programs can compress and decompress text file consisting of 256 ASCII characters.
 
 ### Compression
 
