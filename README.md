@@ -15,7 +15,7 @@ The programs can compress and decompress text file consisting of 256 ASCII chara
 1. Open input file, count and store the frequencies of different characters;
 2. Construct Priority Queue and then Huffman Tree;
 3. Calculate Huffman Encode Table;
-4. Encode the file, store Huffman Encode Table and encoded to the output.bin.
+4. Encode the file, store Huffman Encode Table and encoded to the output.dat.
 
 ### Decompression
 
