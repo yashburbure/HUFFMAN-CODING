@@ -15,7 +15,7 @@ Hnode* new_Hnode(char ch,int freq){
     return nn;
 }
 
-void generate_code(Hnode* root,int *curr_cw,int* bit,huffman_encoder* e){
+void generate_code(Hnode* root,unsigned long long *curr_cw,int* bit,huffman_encoder* e){
     if(!root){
         return;
     }
@@ -32,16 +32,16 @@ void generate_code(Hnode* root,int *curr_cw,int* bit,huffman_encoder* e){
     else{
         e->codewords[root->symbol]=*curr_cw;
         e->lengts[root->symbol]=*bit;
-        assert(*bit<=8 && "HUFFMAN code size too large");
+        assert(*bit<=62 && "HUFFMAN code size too large");
     }
 }
 
 void compute_canonical_code(huffman_encoder* e,Hnode* root){
     for(int i=0;i<MAX_HUFFMAN_SYMBOLS;i++){
-        e->codewords[i]=0;
-        e->lengts[i]=0;
+        e->codewords[i]=0ll;
+        e->lengts[i]=0ll;
     }
-    int curr_codewords=0;
+    unsigned long long curr_codewords=0ll;
     int bit=0;
     generate_code(root,&curr_codewords,&bit,e);
 }
@@ -59,7 +59,7 @@ void build_huffman_tree(huffman_encoder* e,int freqs[],int n){
     for(int i=0;i<n;i++){
         freq_sum+=freqs[i];
     }
-    assert(freq_sum<=INT_MAX && "Frequency Sum too large!");
+    assert(freq_sum<=INT_MAX && "File size too large!");
     heap h;
     init_heap(&h);
     for(int i=0;i<n;i++){
@@ -93,8 +93,8 @@ void build_huffman_tree(huffman_encoder* e,int freqs[],int n){
 }
 void huffman_encoder_init(huffman_encoder* e,int freqs[],int n){
     for(int i=0;i<MAX_HUFFMAN_SYMBOLS;i++){
-        e->codewords[i]=0;
-        e->lengts[i]=0;
+        e->codewords[i]=0ll;
+        e->lengts[i]=0ll;
     }
     build_huffman_tree(e,freqs,n);
 }

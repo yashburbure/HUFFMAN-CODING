@@ -11,8 +11,8 @@ typedef struct Hnode{
 }Hnode;
 
 typedef struct huffman_encoder{
-    int codewords[MAX_HUFFMAN_SYMBOLS];
-    int lengts[MAX_HUFFMAN_SYMBOLS];
+    unsigned long long codewords[MAX_HUFFMAN_SYMBOLS];
+    unsigned long long lengts[MAX_HUFFMAN_SYMBOLS];
 }huffman_encoder;
 
 Hnode* new_Hnode(char ch,int freq);
