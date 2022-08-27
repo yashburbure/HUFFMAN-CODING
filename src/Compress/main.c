@@ -8,12 +8,12 @@ int main(int argc,char** argv){
         printf("Enter 1 to Compress File\nEnter 2 to Decompress File\nEnter 3 to Exit\n");
         printf("Choice : ");
         scanf("%d",&choice);
-        fflush(stdin);
+        char ch;
+        scanf("%c",&ch);
         if(choice==1){
             printf("Enter File Name: ");
             char filename[50];
             fgets(filename,50,stdin);
-            fflush(stdin);
             for(int i=0;i<50;i++){
                 if(filename[i]==' ' || filename[i]=='\n' || filename[i]=='\0'){
                     filename[i]='\0';
@@ -27,7 +27,6 @@ int main(int argc,char** argv){
             printf("Enter File Name: ");
             char filename[50];
             fgets(filename,50,stdin);
-            fflush(stdin);
             for(int i=0;i<50;i++){
                 if(filename[i]==' ' || filename[i]=='\n' || filename[i]=='\0'){
                     filename[i]='\0';
@@ -43,6 +42,7 @@ int main(int argc,char** argv){
         else{
             printf("Invalid choice\n");
         }
+        fflush(stdin);
     }
     return 0;
 }

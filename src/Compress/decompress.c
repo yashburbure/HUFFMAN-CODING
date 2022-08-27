@@ -3,18 +3,20 @@
 #define FREQ_SIZE 256
 #include<stdio.h>
 #include"decompress.h"
-FILE* table_reader(FILE* file,unsigned long long codewords[],unsigned long long lengths[]){
+#include<limits.h>
+#include"hashMap.h"
+HashMap mp;
+FILE* table_reader(FILE* file){
     unsigned int no_ele=0;
     fread(&no_ele,sizeof(no_ele),1,file);
     for(int i=0;i<no_ele;i++){
         unsigned char ch;
         fread(&ch,sizeof(ch),1,file);
-        int index=(int)ch;
-        fread(&ch,sizeof(ch),1,file);
-        lengths[index]=(int)ch;
+        unsigned char size;
+        fread(&size,sizeof(size),1,file);
         unsigned long long code;
         fread(&code,sizeof(code),1,file);
-        codewords[index]=code;
+        insertMap(&mp,code,size,ch);
     }
     return file;
 }
@@ -29,13 +31,8 @@ void decompress(char* filename){
         printf("Can't write in file\n");
         return;
     }
-    unsigned long long codewords[FREQ_SIZE];
-    unsigned long long lengths[FREQ_SIZE];
-    for(int i=0;i<FREQ_SIZE;++i){
-        codewords[i]=0ll;
-        lengths[i]=0ll;
-    }
-    file=table_reader(file,codewords,lengths);
+    initMap(&mp);
+    file=table_reader(file);
     int bitswritten;
     fread(&bitswritten,sizeof(bitswritten),1,file);
     unsigned char ch;
@@ -49,13 +46,11 @@ void decompress(char* filename){
                 buffer|=(1<<buffer_size);
             }
             buffer_size++;
-            for(int i=0;i<FREQ_SIZE;i++){
-                if(codewords[i]==buffer && lengths[i]==buffer_size){
-                    fprintf(out,"%c",(char)i);
-                    buffer=0;
-                    buffer_size=0;
-                    break;  
-                }
+            if(findMap(mp,buffer,buffer_size)!=INT_MIN){
+                char ch=findMap(mp,buffer,buffer_size);
+                fprintf(out,"%c",ch);
+                buffer=0;
+                buffer_size=0;
             }
             if(bitsread==bitswritten){
                 fclose(out);
